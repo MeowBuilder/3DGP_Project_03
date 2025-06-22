@@ -136,9 +136,14 @@ protected:
 	float m_fTurretPitch = 0.0f;
 
 	XMFLOAT3 m_xmf3SmoothedUp = XMFLOAT3(0.0f, 1.0f, 0.0f); // 초기값은 수직 Up
+
+	const int BULLET_POOL_SIZE = 100;
+	std::vector<CBulletObject*> m_vBullets;
+
+	CCubeMeshDiffused* m_pBulletMesh = nullptr;
 public:
 	CTankPlayer(int nMeshes = 1);
-	virtual ~CTankPlayer() {};
+	virtual ~CTankPlayer() ;
 	virtual void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 		ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext);
 	void SetTankParts(CGameObject* pLower, CGameObject* pUpper, CGameObject* pBarrel);
@@ -147,4 +152,6 @@ public:
 	virtual void OnPlayerUpdateCallback(float fTimeElapsed);
 	void RotateUpperBody(float fYawDelta);   // 좌우 회전
 	void RotateTurret(float fPitchDelta);    // 상하 회전
+
+	void FireBullet(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 };

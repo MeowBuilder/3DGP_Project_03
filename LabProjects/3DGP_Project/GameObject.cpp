@@ -316,3 +316,36 @@ CHeightMapTerrain::~CHeightMapTerrain(void)
 {
 	if (m_pHeightMapImage) delete m_pHeightMapImage;
 }
+
+CBulletObject::CBulletObject()
+{
+
+}
+
+CBulletObject::~CBulletObject()
+{
+
+}
+
+void CBulletObject::Update(float fTimeElapsed)
+{
+	if (!m_bActive) return;
+
+	float fDistance = m_fSpeed * fTimeElapsed;
+	XMFLOAT3 shift = Vector3::ScalarProduct(m_xmf3Direction, fDistance, false);
+	Move(shift, false);
+	m_fTraveledDistance += fDistance;
+
+	if (m_fTraveledDistance > m_fMaxDistance)
+		m_bActive = false;
+}
+
+void CBulletObject::Fire(const XMFLOAT3& pos, const XMFLOAT3& dir, float speed)
+{
+	XMFLOAT3 xmf3Dir = dir;
+	SetPosition(pos);
+	m_xmf3Direction = Vector3::Normalize(xmf3Dir);
+	m_fSpeed = speed;
+	m_fTraveledDistance = 0.0f;
+	m_bActive = true;
+}

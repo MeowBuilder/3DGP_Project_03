@@ -463,9 +463,27 @@ CTankPlayer::CTankPlayer(int nMeshes)
 {
 }
 
+CTankPlayer::~CTankPlayer() {
+	for (CBulletObject* pBullet : m_vBullets)
+		delete pBullet;
+	m_vBullets.clear();
+
+	if (m_pBulletMesh) delete m_pBulletMesh;
+	m_pBulletMesh = nullptr;
+}
+
 void CTankPlayer::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
+	m_pBulletMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 2.0f, 2.0f, 4.0f);
+
+	for (int i = 0; i < BULLET_POOL_SIZE; ++i)
+	{
+		CBulletObject* pBullet = new CBulletObject();
+		pBullet->SetMesh(0, m_pBulletMesh);
+		m_vBullets.push_back(pBullet);
+	}
+
 	m_fUpperYaw = 0.0f;
 	m_fTurretPitch = 0.0f;
 
@@ -576,6 +594,9 @@ void CTankPlayer::Update(float fTimeElapsed)
     XMFLOAT4X4 xmf4x4TurretWorld;
     XMStoreFloat4x4(&xmf4x4TurretWorld, mtxTurretWorld);
     m_pTurret->SetWorldMAT(xmf4x4TurretWorld);
+
+	for (CBulletObject* pBullet : m_vBullets)
+		if (pBullet->IsActive()) pBullet->Update(fTimeElapsed);
 }
 
 void CTankPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
@@ -589,6 +610,9 @@ void CTankPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 		m_pUpperBody->Render(pd3dCommandList, pCamera);
 		m_pTurret->Render(pd3dCommandList, pCamera);
 	}
+
+	for (CBulletObject* pBullet : m_vBullets)
+		if (pBullet->IsActive()) pBullet->Render(pd3dCommandList, pCamera);
 }
 
 void CTankPlayer::RotateUpperBody(float fYawDelta)
@@ -602,4 +626,19 @@ void CTankPlayer::RotateTurret(float fPitchDelta)
 {
 	m_fTurretPitch += fPitchDelta;
 	m_fTurretPitch = max(-10.0f, min(30.0f, m_fTurretPitch));  // 상하 각도 제한
+}
+
+void CTankPlayer::FireBullet(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	for (CBulletObject* pBullet : m_vBullets)
+	{
+		if (!pBullet->IsActive())
+		{
+			XMFLOAT4X4 turret = m_pTurret->GetWorldMAT();
+			XMFLOAT3 pos(turret._41, turret._42, turret._43);
+			XMFLOAT3 dir(turret._31, turret._32, turret._33);
+			pBullet->Fire(pos, dir);
+			break; // 한 개만 활성화
+		}
+	}
 }

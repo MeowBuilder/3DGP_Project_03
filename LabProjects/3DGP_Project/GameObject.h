@@ -118,25 +118,17 @@ public:
 class CBulletObject : public CGameObject
 {
 protected:
-	XMFLOAT3 m_xmf3FirePosition = { 0.0f, 0.0f, 0.0f };
-	XMFLOAT3 m_xmf3Direction = { 0.0f, 0.0f, 1.0f };
-
-	float m_fRange = 1000.0f;
+	XMFLOAT3 m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	float m_fSpeed = 500.0f;
 	float m_fTraveledDistance = 0.0f;
-	float m_fSpeed = 120.0f;
-
+	float m_fMaxDistance = 1000.0f;
+	bool m_bActive = false;
 public:
-	CGameObject* m_pLockedObject = nullptr;
+	CBulletObject();
+	virtual ~CBulletObject();
 
-public:
-	//CBulletObject(float fRange = 1000.0f);
-	//virtual ~CBulletObject();
-
-	//void SetFirePosition(const XMFLOAT3& pos);
-	//void SetMovingDirection(XMFLOAT3& dir);
-	//void SetMovingSpeed(float fSpeed) { m_fSpeed = fSpeed; }
-
-	//virtual void Animate(float fElapsedTime) override;
-
-	//virtual bool CheckCollisionWith(CGameObject* pOther);
+	void Fire(const XMFLOAT3& pos, const XMFLOAT3& dir, float speed = 500.0f);
+	void Deactivate() { m_bActive = false; }
+	bool IsActive() const { return m_bActive; }
+	void Update(float fTimeElapsed);
 };

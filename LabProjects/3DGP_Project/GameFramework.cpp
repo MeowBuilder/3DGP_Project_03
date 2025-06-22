@@ -362,6 +362,16 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			break;
 		}
 		break;
+	case WM_KEYDOWN:
+		switch (wParam)
+		{
+		case 'a':
+		case 'A':
+			m_pPlayer->FireBullet(m_pd3dDevice, m_pd3dCommandList);
+			break;
+		default:
+			break;
+		}
 	default:
 		break;
 	}
